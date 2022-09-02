@@ -116,33 +116,19 @@ resource "aws_iam_role_policy_attachment" "KP-AmazonEKSVPCResourceController" {
 }
 
 
-### WORKER NODE ROLE ###
-
-resource "aws_iam_role" "KP" {
-  name = "eks-node-group-KP"
-
-  assume_role_policy = jsonencode({
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-    Version = "2012-10-17"
-  })
-}
-
 ### SECURITY GROUPS ###
 
-resource "aws_security_group" "eks-cluster-sg" {
-  name        = "${var.name}-cluster-sg"
+resource "aws_security_group" "node_group_kp" {
+  name_prefix = "node_group_kp"
   vpc_id      = var.vpc_id
 
-  tags = {
-    Name = "${var.name}-cluster-sg"
-  }
+  ingress {
+    from_port = 80
+    to_port   = 80
+    protocol  = "tcp"
 
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -173,49 +159,34 @@ resource "aws_security_group" "eks-node-sg" {
   }
 }
 
-#WORKER NODE ROLE ATTACMENT#
+### WORKER NODE ROLE ###
 
-resource "aws_iam_role_policy_attachment" "example-AmazonEKS_CNI_Policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.example2.name
-}
+resource "aws_iam_role" "KP" {
+  name = "eks-node-group-KP"
 
-resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryReadOnly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.example2.name
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+    Version = "2012-10-17"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "example-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.example2.name
+  role       = aws_iam_role.example.name
 }
 
-### SECURITY GROUP RULE ###
-
-resource "aws_security_group_rule" "eks-node-ingress-self" {
-  from_port                = 0
-  protocol                 = "-1"
-  security_group_id        = aws_security_group.eks-node-sg.id
-  source_security_group_id = aws_security_group.eks-node-sg.id
-  to_port                  = 65535
-  type                     = "ingress"
+resource "aws_iam_role_policy_attachment" "example-AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.example.name
 }
 
-resource "aws_security_group_rule" "eks-node-ingress-cluster" {
-  from_port                = 1025
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.eks-node-sg.id
-  source_security_group_id = aws_security_group.eks-cluster-sg.id
-  to_port                  = 65535
-  type                     = "ingress"
+resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.example.name
 }
-
-
-resource "aws_security_group_rule" "eks-node-ingress-https" {
-  from_port                = 443
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.eks-cluster-sg.id
-  source_security_group_id = aws_security_group.eks-node-sg.id
-  to_port                  = 443
-  type                     = "ingress" 
-  }
