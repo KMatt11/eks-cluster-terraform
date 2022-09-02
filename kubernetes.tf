@@ -1,8 +1,10 @@
-resource "kubernetes_deployment" "example" {
+###### root/kubernetes.tf
+
+resource "kubernetes_deployment" "KP" {
   metadata {
-    name = "terraform-example"
+    name = "terraform-KP"
     labels = {
-      test = "MyExampleApp"
+      test = "MyKPApp"
     }
   }
 
@@ -11,21 +13,21 @@ resource "kubernetes_deployment" "example" {
 
     selector {
       match_labels = {
-        test = "MyExampleApp"
+        test = "MyKPApp"
       }
     }
 
     template {
       metadata {
         labels = {
-          test = "MyExampleApp"
+          test = "MyKPApp"
         }
       }
 
       spec {
         container {
           image = "nginx:1.21.6"
-          name  = "example"
+          name  = "KP"
 
           resources {
             limits = {

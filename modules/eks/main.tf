@@ -137,7 +137,6 @@ resource "aws_iam_role" "KP" {
 
 resource "aws_security_group" "eks-cluster-sg" {
   name        = "${var.name}-cluster-sg"
-  description = "Security Group for Control Plane"
   vpc_id      = var.vpc_id
 
   tags = {
@@ -154,7 +153,6 @@ resource "aws_security_group" "eks-cluster-sg" {
 
 resource "aws_security_group_rule" "eks-cluster-ingress-https" {
   cidr_blocks       = ["0.0.0.0/0"]
-  description       = "Allow Inbound HTTPS Traffic to Control Plane"
   from_port         = 443
   protocol          = "tcp"
   security_group_id = aws_security_group.eks-cluster-sg.id
@@ -164,7 +162,6 @@ resource "aws_security_group_rule" "eks-cluster-ingress-https" {
 
 resource "aws_security_group" "eks-node-sg" {
   name        = "${var.name}-node-sg"
-  description = "Security Group for Worker Nodes"
   vpc_id      = var.vpc_id
 
 
@@ -196,7 +193,6 @@ resource "aws_iam_role_policy_attachment" "example-AmazonEKSWorkerNodePolicy" {
 ### SECURITY GROUP RULE ###
 
 resource "aws_security_group_rule" "eks-node-ingress-self" {
-  description              = "Allow worker nodes to communicate with each other"
   from_port                = 0
   protocol                 = "-1"
   security_group_id        = aws_security_group.eks-node-sg.id
@@ -206,7 +202,6 @@ resource "aws_security_group_rule" "eks-node-ingress-self" {
 }
 
 resource "aws_security_group_rule" "eks-node-ingress-cluster" {
-  description              = "Allow worker nodes to receive inbound traffic from control plane"
   from_port                = 1025
   protocol                 = "tcp"
   security_group_id        = aws_security_group.eks-node-sg.id
@@ -217,11 +212,10 @@ resource "aws_security_group_rule" "eks-node-ingress-cluster" {
 
 
 resource "aws_security_group_rule" "eks-node-ingress-https" {
-  description              = "Allow Control Plane to receive inbound traffic from Worker Nodes"
   from_port                = 443
   protocol                 = "tcp"
   security_group_id        = aws_security_group.eks-cluster-sg.id
   source_security_group_id = aws_security_group.eks-node-sg.id
   to_port                  = 443
-  type                     = "ingress"
-}
+  type                     = "ingress" 
+  }

@@ -1,6 +1,6 @@
 ###### root/main.tf
 module "vpc" {
-  source           = "../../../../modules/vpc"
+  source           = "./modules/vpc"
   vpc_cidr         = local.vpc_cidr
   tags             = local.tags
   public_sn_count  = 2
@@ -10,7 +10,7 @@ module "vpc" {
 }
 
 module "eks" {
-  source          = "../../../../modules/eks"
+  source          = "./modules/eks"
   tags            = local.tags
   name            = local.name
   vpc_id          = module.networking.vpc_id

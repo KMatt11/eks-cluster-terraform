@@ -1,3 +1,5 @@
+###### root/outputs.tf
+
 output "cluster_name" {
   description = "K8scluster_name"
   value       = module.eks.cluster_name
