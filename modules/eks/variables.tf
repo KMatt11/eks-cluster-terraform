@@ -16,8 +16,6 @@ variable "min_size" {
   type = number
 }
 
-variable "aws_public_subnet" {}
-
 variable "vpc_id" {}
 
 variable "cluster_name" {}
@@ -38,3 +36,6 @@ variable "scaling_min_size" {}
 
 variable "instance_types" {}
 
+variable "public_subnets" {}
+
+variable "private_subnets" {}

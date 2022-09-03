@@ -1,8 +1,8 @@
 ###### root/kubernetes.tf
 
-resource "kubernetes_deployment" "KP" {
+resource "kubernetes_deployment" "kpP" {
   metadata {
-    name = "terraform-KP"
+    name = "terraform-kp"
     labels = {
       test = "MyKPApp"
     }
