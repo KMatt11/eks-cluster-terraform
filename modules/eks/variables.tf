@@ -1,20 +1,6 @@
 #######modules/eks/variables.tf
 
-variable "tags" {
-  description = "aws-tags"
-}
-
-variable "desired_size" {
-  type = number
-}
-
-variable "max_size" {
-  type = number
-}
-
-variable "min_size" {
-  type = number
-}
+variable "aws_public_subnet" {}
 
 variable "vpc_id" {}
 
@@ -36,6 +22,5 @@ variable "scaling_min_size" {}
 
 variable "instance_types" {}
 
-variable "public_subnets" {}
+variable "key_pair" {}
 
-variable "private_subnets" {}

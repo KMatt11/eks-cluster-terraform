@@ -1,30 +1,25 @@
-resource "aws_eks_cluster" "KP" {
+resource "aws_eks_cluster" "luit22" {
   name     = var.cluster_name
-  role_arn = aws_iam_role.KP.arn 
+  role_arn = aws_iam_role.luit22.arn
 
   vpc_config {
-  
-  subnet_ids              = flatten([var.public_subnets[*], var.private_subnets[*]])
-  security_group_ids      = ["${aws_security_group.eks-cluster-sg.id}"]
-  endpoint_private_access = true
-    # subnet_ids              = var.aws_public_subnet
-    # endpoint_public_access  = var.endpoint_public_access
-    # endpoint_private_access = var.endpoint_private_access
-    # public_access_cidrs     = var.public_access_cidrs
-    # security_group_ids      = [aws_security_group.node_group_one.id] 
+    subnet_ids              = var.aws_public_subnet
+    endpoint_public_access  = var.endpoint_public_access
+    endpoint_private_access = var.endpoint_private_access
+    public_access_cidrs     = var.public_access_cidrs
+    security_group_ids      = [aws_security_group.node_group_one.id]
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.example-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.example-AmazonEKSVPCResourceController,
+    aws_iam_role_policy_attachment.luit22-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.luit22-AmazonEKSVPCResourceController,
   ]
 }
 
-
-resource "aws_eks_node_group" "KP" {
-  cluster_name    = aws_eks_cluster.KP.name
+resource "aws_eks_node_group" "luit22" {
+  cluster_name    = aws_eks_cluster.luit22.name
   node_group_name = var.node_group_name
-  node_role_arn   = aws_iam_role.KP.arn
+  node_role_arn   = aws_iam_role.luit222.arn
   subnet_ids      = var.aws_public_subnet
   instance_types  = var.instance_types
 
@@ -40,9 +35,9 @@ resource "aws_eks_node_group" "KP" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.KP-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.KP-AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.KP-AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.luit22-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.luit22-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.luit22-AmazonEC2ContainerRegistryReadOnly,
   ]
 }
 
@@ -65,9 +60,8 @@ resource "aws_security_group" "node_group_one" {
   }
 }
 
-
-resource "aws_iam_role" "KP" {
-  name = "eks-cluster-KP"
+resource "aws_iam_role" "luit22" {
+  name = "eks-cluster-luit22"
 
   assume_role_policy = <<POLICY
 {
@@ -85,20 +79,20 @@ resource "aws_iam_role" "KP" {
 POLICY
 }
 
-resource "aws_iam_role_policy_attachment" "KP-AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "luit22-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.KP.name
+  role       = aws_iam_role.luit22.name
 }
 
 # Optionally, enable Security Groups for Pods
 # Reference: https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
-resource "aws_iam_role_policy_attachment" "KP-AmazonEKSVPCResourceController" {
+resource "aws_iam_role_policy_attachment" "luit22-AmazonEKSVPCResourceController" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.KP.name
+  role       = aws_iam_role.luit22.name
 }
 
-resource "aws_iam_role" "KP2" {
-  name = "eks-node-group-KP"
+resource "aws_iam_role" "luit222" {
+  name = "eks-node-group-luit22"
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -112,17 +106,17 @@ resource "aws_iam_role" "KP2" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "KP-AmazonEKSWorkerNodePolicy" {
+resource "aws_iam_role_policy_attachment" "luit22-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.KP.name
+  role       = aws_iam_role.luit222.name
 }
 
-resource "aws_iam_role_policy_attachment" "KP-AmazonEKS_CNI_Policy" {
+resource "aws_iam_role_policy_attachment" "luit22-AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.KP.name
+  role       = aws_iam_role.luit222.name
 }
 
-resource "aws_iam_role_policy_attachment" "KP-AmazonEC2ContainerRegistryReadOnly" {
+resource "aws_iam_role_policy_attachment" "luit22-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.KP.name
+  role       = aws_iam_role.luit222.name
 }

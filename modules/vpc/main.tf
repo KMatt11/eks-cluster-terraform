@@ -1,114 +1,54 @@
 #######modules/vpc/main.tf
-
-
-resource "aws_vpc" "KP_vpc" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  # tags = {
-  #   Name = "KP_vpc"
-  # }
-  lifecycle {
-    create_before_destroy = true
+resource "aws_vpc" "luit22" {
+  cidr_block       = var.vpc_cidr 
+  instance_tenancy = var.instance_tenancy
+  tags = {
+    Name = var.tags
   }
 }
 
+resource "aws_internet_gateway" "luit22_gw" {
+  vpc_id = aws_vpc.luit22.id
+
+  tags = {
+    Name = var.tags
+  }
+}
 data "aws_availability_zones" "available" {
 }
 
-### INTERNET GATEWAY ###
 
-resource "aws_internet_gateway" "KP_internet_gateway" {
-  vpc_id = aws_vpc.KP_vpc.id
+resource "random_shuffle" "az_list" {
+  input        = data.aws_availability_zones.available.names
+  result_count = 2
+}
 
-  # tags = var.tags
-
-  lifecycle {
-    create_before_destroy = true
+resource "aws_subnet" "public_luit22_subnet" {
+  count                   = var.public_sn_count
+  vpc_id                  = aws_vpc.luit22.id
+  cidr_block              = var.public_cidrs[count.index]
+  availability_zone       = random_shuffle.az_list.result[count.index]
+  map_public_ip_on_launch = var.map_public_ip_on_launch
+  tags = {
+    Name = var.tags
   }
 }
 
 
-### PUBLIC SUBNETS AND ASSOCIATED ROUTE TABLES ###
+resource "aws_default_route_table" "internal_luit22_default" {
+  default_route_table_id = aws_vpc.luit22.default_route_table_id
 
-resource "aws_subnet" "eks_public_subnets" {
-  count                   = var.public_sn_count
-  vpc_id                  = aws_vpc.KP_vpc.id
-  cidr_block              = "10.123.${10 + count.index}.0/24"
-  map_public_ip_on_launch = true
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  route {
+    cidr_block = var.rt_route_cidr_block
+    gateway_id = aws_internet_gateway.luit22_gw.id
+  }
+  tags = {
+    Name = var.tags
+  }
 }
 
-#   tags = {
-#     Name                                       = "KP_public_${count.index + 1}"
-#     "kubernetes.io/cluster/KP-public-cluster" = "shared"
-#     "kubernetes.io/role/elb"                   = 1
-#   }
-# }
-
-resource "aws_route_table" "KP_public_rt" {
-  vpc_id = aws_vpc.KP_vpc.id
-
-  # tags = var.tags
-}
-
-resource "aws_route" "default_public_route" {
-  route_table_id         = aws_route_table.KP_public_rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.KP_internet_gateway.id
-}
-
-resource "aws_route_table_association" "KP_public_assoc" {
+resource "aws_route_table_association" "default" {
   count          = var.public_sn_count
-  subnet_id      = aws_subnet.eks_public_subnets.*.id[count.index]
-  route_table_id = aws_route_table.KP_public_rt.id
-}
-
-
-### EIP AND NAT GATEWAY ###
-
-resource "aws_eip" "KP_nat_eip" {
-  vpc = true
-}
-
-resource "aws_nat_gateway" "KP_ngw" {
-  allocation_id = aws_eip.KP_nat_eip.id
-  subnet_id     = aws_subnet.eks_public_subnets[0].id
-}
-
-
-### PRIVATE SUBNETS AND ASSOCIATED ROUTE TABLES ###
-
-resource "aws_subnet" "eks_private_subnets" {
-  count                   = var.private_sn_count
-  vpc_id                  = aws_vpc.KP_vpc.id
-  cidr_block              = "10.123.${20 + count.index}.0/24"
-  map_public_ip_on_launch = false
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
-}
-#   tags = {
-#     Name                                        = "KP_private_${count.index + 1}"
-#     "kubernetes.io/cluster/KP-private-cluster" = "shared"
-#     "kubernetes.io/role/internal-elb"           = 1
-#   }
-# }
-
-resource "aws_route_table" "KP_private_rt" {
-  vpc_id = aws_vpc.KP_vpc.id
-}
-#   tags = var.tags
-# }
-
-resource "aws_route" "default_private_route" {
-  route_table_id         = aws_route_table.KP_private_rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.KP_ngw.id
-}
-
-
-resource "aws_route_table_association" "KP_private_assoc" {
-  count          = var.private_sn_count
-  route_table_id = aws_route_table.KP_private_rt.id
-  subnet_id      = aws_subnet.eks_private_subnets.*.id[count.index]
+  subnet_id      = aws_subnet.public_luit22_subnet[count.index].id
+  route_table_id = aws_default_route_table.internal_luit22_default.id
 }
