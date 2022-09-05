@@ -1,33 +1,30 @@
 ###### root/kubernetes.tf
 
-resource "kubernetes_deployment" "kpP" {
+resource "kubernetes_deployment" "luit22" {
   metadata {
-    name = "terraform-kp"
+    name = "terraform-luit22"
     labels = {
-      test = "MyKPApp"
+      test = "Myluit22App"
     }
   }
 
   spec {
     replicas = 2
-
     selector {
       match_labels = {
-        test = "MyKPApp"
+        test = "Myluit22App"
       }
     }
-
     template {
       metadata {
         labels = {
-          test = "MyKPApp"
+          test = "Myluit22App"
         }
       }
-
       spec {
         container {
-          image = "nginx:1.21.6"
-          name  = "KP"
+          image = "nginx:1.7.8"
+          name  = "luit22"
 
           resources {
             limits = {
@@ -39,23 +36,27 @@ resource "kubernetes_deployment" "kpP" {
               memory = "50Mi"
             }
           }
-
-          liveness_probe {
-            http_get {
-              path = "/"
-              port = 80
-
-              http_header {
-                name  = "X-Custom-Header"
-                value = "Awesome"
-              }
-            }
-
-            initial_delay_seconds = 1
-            period_seconds        = 1
-          }
         }
       }
     }
+  }
+}
+
+resource "kubernetes_service" "luit22" {
+  metadata {
+    name = "terraform-luit22"
+  }
+
+  spec {
+    selector = {
+      test = "myluit22App"
+    }
+    port {
+      port        = 80
+      target_port = 80
+      node_port   = 30010
+    }
+
+    type = "LoadBalancer"
   }
 }
